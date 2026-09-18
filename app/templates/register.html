@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Create Ticket - Support CRM</title>
+    <style>
+        .tickets-link {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+    </style>
+</head>
+<body>
+<a href="/tickets" class="tickets-link">View All Tickets</a>
+<h1>Create New Support Ticket</h1>
+    {% if message %}
+        <h3 style="color: green;">{{ message }}</h3>
+        <p style="color: green;">Ticket ID: {{ ticket_id }}</p>
+    {% endif %}
+
+    <form method="post" action="/register">
+        <div>
+            <label for="customer_name">Customer Name: </label>
+            <input type="text" id="customer_name" name="customer_name" required>
+        </div>
+        <br>
+        <div>
+            <label for="customer_email">Customer Email: </label>
+            <input type="email" id="customer_email" name="customer_email" required>
+        </div>
+        <br>
+        <div>
+            <label for="subject">Issue Title: </label>
+            <input type="text" id="subject" name="subject" required>
+        </div>
+        <br>
+        <div>
+            <label for="description">Issue Description</label>
+            <br>
+            <textarea id="description" name="description" rows="6" cols="50" required></textarea>
+        </div>
+        <br>
+            <button type="submit">Create Ticket</button>
+            <button type="reset">Cancel</button>
+    </form>
+</body>
+</html>

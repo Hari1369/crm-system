@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Support CRM</title>
+    <style>
+        /* Modal background */
+        #reply_modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Modal box */
+        #reply_box {
+            background-color: white;
+            width: 500px;
+            padding: 20px;
+            margin: 100px auto;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tickets</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Ticket ID</th>
+                <th>Customer Name</th>
+                <th>Customer Email</th>
+                <th>Subject</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Created At</th>
+                <th>Updated At</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ticket in tickets %}
+            <tr>
+                <td>{{ ticket.id }}</td>
+                <td>{{ ticket.ticket_id }}</td>
+                <td>{{ ticket.customer_name }}</td>
+                <td>{{ ticket.customer_email }}</td>
+                <td>{{ ticket.subject }}</td>
+                <td>{{ ticket.description }}</td>
+                <td>{{ ticket.status }}</td>
+                <td>{{ ticket.created_at }}</td>
+                <td>{{ ticket.updated_at }}</td>
+
+                <td>
+                    <button onclick="reply_data('{{ ticket.ticket_id }}')">
+                        Reply
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <h1>Notes</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Ticket ID</th>
+                <th>Note</th>
+                <th>Created At</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for note in notes %}
+            <tr>
+                <td>{{ note.id }}</td>
+                <td>{{ note.ticket_id }}</td>
+                <td>{{ note.note_text }}</td>
+                <td>{{ note.created_at }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div id="reply_modal">
+        <div id="reply_box">
+            <h2>Reply to Ticket</h2>
+            <p>Ticket ID: <span id="reply_ticket_id"></span></p>
+            <form method="post" action="/reply">
+                <input type="hidden" name="ticket_id" id="ticket_id">
+                <textarea name="note_text" rows="5" cols="50" placeholder="Write your reply..." required ></textarea>
+                <br>
+                <br>
+                <button type="submit"> Send Reply</button>
+                <button type="button" onclick="close_reply()"> Cancel </button>
+            </form>
+        </div>
+    </div>
+    <script>
+        function reply_data(ticket_id) {
+            document.getElementById("reply_modal").style.display = "block";
+            document.getElementById("reply_ticket_id").innerText = ticket_id;
+            document.getElementById("ticket_id").value = ticket_id;
+        }
+        function close_reply() {
+            document.getElementById("reply_modal").style.display = "none";
+        }
+    </script>
+</body>
+</html>
