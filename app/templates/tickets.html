@@ -94,10 +94,59 @@
             padding: 6px 10px;
             cursor: pointer;
         }
+        .reply-btn {
+            width: 80px;
+            height: 35px;
+            cursor: pointer;
+        }
+
+        .reply-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .search-container {
+            width: 100%;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-container input {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .search-container button {
+            width: 100px;
+            padding: 10px;
+            font-size: 16px;
+        }
+
     </style>
 </head>
 <body>
     <h1>Tickets</h1>
+    <div class="search-container">
+        <form method="get" action="/tickets" style="display: flex; width: 100%; gap: 10px;">
+            <input
+                type="text"
+                name="query"
+                placeholder="Search tickets..."
+                value="{{ query }}"
+            >
+            <button type="submit">Search</button>
+
+            <a href="/tickets">
+                <button type="button">Clear</button>
+            </a>
+        </form>
+    </div>
+
+    <br>
+
+
+
     <div class="table-container">
         <table>
             <thead>
@@ -112,6 +161,7 @@
                     <th class="date">Created At</th>
                     <th class="date">Updated At</th>
                     <th class="action">Action</th>
+                    <th class="action">View</th>
                 </tr>
             </thead>
             <tbody>
@@ -133,8 +183,23 @@
                         {% endif %}
                     </td>
                     <td>
-                        <button onclick="reply_data('{{ ticket.ticket_id }}')">
-                            Reply
+                        {% if ticket.updated_at == "Action Required" %}
+                            <button 
+                                class="reply-btn"
+                                onclick="reply_data('{{ ticket.ticket_id }}')">
+                                Reply
+                            </button>
+                        {% else %}
+                            <button 
+                                class="reply-btn"
+                                disabled>
+                                Replied
+                            </button>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button onclick="view_report('{{ ticket.id }}', '{{ ticket.ticket_id }}')">
+                            Report
                         </button>
                     </td>
                 </tr>
@@ -142,31 +207,7 @@
             </tbody>
         </table>
     </div>
-
-
-    <!-- <h1>Notes</h1>
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th class="note-ticket-id">Ticket ID</th>
-                    <th class="note-text">Note</th>
-                    <th class="note-date">Created At</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for note in notes %}
-                <tr>
-                    <td>{{ note.id }}</td>
-                    <td>{{ note.ticket_id }}</td>
-                    <td>{{ note.note_text }}</td>
-                    <td>{{ note.created_at }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table> -->
-    </div>
+    
     <div id="reply_modal">
         <div id="reply_box">
             <h2>Reply to Ticket</h2>
@@ -181,6 +222,8 @@
             </form>
         </div>
     </div>
+
+
     <script>
         function reply_data(ticket_id) {
             document.getElementById("reply_modal").style.display = "block";
@@ -189,6 +232,9 @@
         }
         function close_reply() {
             document.getElementById("reply_modal").style.display = "none";
+        }
+        function view_report(id, ticket_id) {
+            window.location.href = "/ticket_report?id=" + id + "&ticket_id=" + ticket_id;
         }
     </script>
 </body>

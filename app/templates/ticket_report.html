@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ticket Report</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .report-container {
+            width: 80%;
+            margin: 30px auto;
+        }
+
+        .ticket-details {
+            border: 1px solid black;
+            padding: 20px;
+        }
+
+        .ticket-details p {
+            margin: 10px 0;
+        }
+
+        .label {
+            font-weight: bold;
+        }
+
+        .notes-section {
+            margin-top: 30px;
+        }
+
+        .note {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .note-date {
+            font-size: 13px;
+            color: gray;
+        }
+
+        .no-notes {
+            color: red;
+        }
+
+        .back-button {
+            margin-top: 20px;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+
+        .reply-issue-button {
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        #reply_modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        #reply_box {
+            background-color: white;
+            width: 500px;
+            padding: 20px;
+            margin: 100px auto;
+            border: 1px solid black;
+        }
+        .reply-buttons {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="reply_modal">
+        <div id="reply_box">
+            <h2>Reply to Issue</h2>
+            <p>
+                <span class="label">Ticket ID:</span>
+                <span id="reply_ticket_id"></span>
+            </p>
+            <textarea id="reply_message" rows="6" cols="60" placeholder="Write your reply..." required> </textarea>
+            <br>
+            <br>
+            <button onclick="submit_reply()"> Send Reply </button>
+            <button onclick="close_reply()"> Cancel </button>
+        </div>
+    </div>
+
+
+    <h1>Ticket Report {{ ticket.ticket_id }}</h1>
+
+    <div class="report-container">
+        <div class="ticket-details">
+            <p hidden> <span class="label">ID: </span>{{ ticket.id }}</p>
+            <p><span class="label">Ticket ID: </span>{{ ticket.ticket_id }}</p>
+            <p><span class="label">Customer Name: </span>{{ ticket.customer_name }}</p>
+            <p><span class="label">Customer Email: </span>{{ ticket.customer_email }}</p>
+            <p><span class="label">Subject: </span>{{ ticket.subject }}</p>
+            <p><span class="label">Description: </span>{{ ticket.description }}</p>
+            <p><span class="label">Status: </span>{{ ticket.status }}</p>
+            <p><span class="label">Issue Date: </span>{{ created_at }}</p>
+            <p><span class="label">Resolved Date: </span>
+                {% if updated_at == "Action Required" %}
+                    <span style="color: red;">Action Required</span>
+                {% else %}
+                    {{ updated_at }}
+                {% endif %}
+            </p>
+        </div>
+
+    <div class="notes-section">
+        <h2>Replies / Notes</h2>
+        {% if notes %}
+            {% for note in notes %}
+                <div class="note">
+                    <p><span class="label">Note:</span>{{ note.note_text }}</p>
+                    <p class="note-date">{{ note.created_at }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-notes">No replies found for this ticket</p>
+        {% endif %}
+    </div>
+
+
+    <div class="button-container">
+        {% if not notes %}
+            <button
+                class="reply-issue-button"
+                onclick="reply_issue('{{ ticket.ticket_id }}')">
+                Reply to Issue
+            </button>
+        {% endif %}
+        <button
+            class="back-button"
+            onclick="window.location.href='/tickets'">
+            Back to Tickets
+        </button>
+    </div>
+
+    <script>
+        let current_ticket_id = "";
+        function reply_issue(ticket_id) {
+            current_ticket_id = ticket_id;
+            document.getElementById("reply_modal").style.display = "block";
+            document.getElementById("reply_ticket_id").innerText = ticket_id;
+            document.getElementById("reply_message").value = "";
+        }
+
+
+        function close_reply() {
+            document.getElementById("reply_modal").style.display = "none";
+        }
+
+
+        async function submit_reply() {
+            const note_text = document.getElementById("reply_message").value;
+
+            if (note_text.trim() === "") {
+                alert("Please enter a reply.");
+                return;
+            }
+
+            const response = await fetch(
+                "/api/tickets/" + current_ticket_id,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        status: "Resolved",
+                        notes: note_text
+                    })
+                }
+            );
+
+            const data = await response.json();
+            if (data.success) {
+                alert("Ticket resolved successfully!");
+                window.location.reload();
+            } else {
+                alert("Failed to update ticket.");
+            }
+        }
+
+    </script>
+</body>
+</html>

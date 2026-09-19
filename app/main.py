@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import text
 
 from app.database import engine, SessionLocal
@@ -7,6 +7,7 @@ from app.models import Ticket, Note
 from fastapi.templating import Jinja2Templates
 from app.schemas.ticket import Ticket_User
 from datetime import datetime
+from sqlalchemy import or_
 
 app = FastAPI()
 db = SessionLocal()
@@ -32,7 +33,35 @@ def register_page(request: Request):
     return templates.TemplateResponse(request, "register.html", {"request": request})
 
 @app.get("/tickets", response_class=HTMLResponse)
-def tickets_page(request: Request):
+def tickets_page(request: Request, query: str = ""):
+    if query:
+        tickets = db.query(Ticket).filter(
+            or_(
+                Ticket.ticket_id.ilike(f"%{query}%"),
+                Ticket.customer_name.ilike(f"%{query}%"),
+                Ticket.customer_email.ilike(f"%{query}%"),
+                Ticket.subject.ilike(f"%{query}%"),
+                Ticket.description.ilike(f"%{query}%"),
+                Ticket.status.ilike(f"%{query}%")
+            )
+        ).all()
+    else:
+        tickets = db.query(Ticket).all()
+    
+    notes = db.query(Note).all()
+    tickets_data, notes_data = tables_data(tickets, notes)
+    return templates.TemplateResponse(
+        request,
+        "tickets.html",
+        {
+            "request": request,
+            "tickets": tickets_data,
+            "notes": notes_data,
+            "query": query
+        }
+    )
+
+
     tickets_data, notes_data = tables_data()
     return templates.TemplateResponse(request,"tickets.html",{"request": request, "tickets": tickets_data, "notes": notes_data})
 
@@ -83,9 +112,68 @@ def register_ticket(request: Request, customer_name: str = Form(), customer_emai
         }
     )
 
-def tables_data():
-    tickets = db.query(Ticket).all()
-    notes = db.query(Note).all()
+
+
+@app.post("/reply")
+def reply_ticket(ticket_id: str = Form(), note_text: str = Form()):
+    ticket = db.query(Ticket).filter(Ticket.ticket_id == ticket_id).first()
+    if not ticket:
+        return {"message": "Ticket not found"}
+    new_note = Note(ticket_id=ticket_id, note_text=note_text, created_at=current_time)
+    db.add(new_note)
+    ticket.updated_at = current_time
+    db.commit()
+    db.refresh(new_note)
+
+    return RedirectResponse(url="/tickets", status_code=303)
+
+
+@app.get("/ticket_report", response_class=HTMLResponse)
+def ticket_report(request: Request, id: int, ticket_id: str):
+    ticket = db.query(Ticket).filter(Ticket.id == id, Ticket.ticket_id == ticket_id).first()
+    if not ticket:
+        return {"message": "Ticket not found"}
+
+    notes = db.query(Note).filter(Note.ticket_id == ticket_id).all()
+    created_at = ticket.created_at.strftime("%d-%m-%Y %H:%M:%S")
+
+    if ticket.updated_at:
+        updated_at = ticket.updated_at.strftime("%d-%m-%Y %H:%M:%S")
+    else:
+        updated_at = "Action Required"
+
+
+    # -------------------------
+    # Notes date formatting
+    # -------------------------
+    notes_data = []
+    for note in notes:
+        note_created_at = note.created_at.strftime("%d-%m-%Y %H:%M:%S")
+        notes_data.append({
+            "request": request,
+            "ticket": ticket,
+            "note_text": note.note_text,
+            "created_at": note_created_at,
+            "notes": notes_data
+        })
+
+
+    return templates.TemplateResponse(
+        request,
+        "ticket_report.html",
+        {
+            "request": request,
+            "ticket": ticket,
+            "notes": notes_data,
+            "created_at": created_at,
+            "updated_at": updated_at
+        }
+    )
+
+# def tables_data():
+def tables_data(tickets, notes):
+    # tickets = db.query(Ticket).all()
+    # notes = db.query(Note).all()
 
     tickets_data = []
     notes_data = []
