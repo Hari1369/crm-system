@@ -22,68 +22,151 @@
             margin: 100px auto;
             border: 1px solid black;
         }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        th,
+        td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+
+        /* Ticket table column widths */
+        .ticket-id {
+            width: 7%;
+        }
+
+        .customer-name {
+            width: 10%;
+        }
+
+        .customer-email {
+            width: 13%;
+        }
+
+        .subject {
+            width: 12%;
+        }
+
+        .description {
+            width: 20%;
+        }
+
+        .status {
+            width: 8%;
+        }
+
+        .date {
+            width: 12%;
+        }
+
+        .action {
+            width: 8%;
+        }
+
+        /* Notes table */
+        .note-ticket-id {
+            width: 15%;
+        }
+
+        .note-text {
+            width: 55%;
+        }
+
+        .note-date {
+            width: 20%;
+        }
+
+        button {
+            padding: 6px 10px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <h1>Tickets</h1>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Ticket ID</th>
-                <th>Customer Name</th>
-                <th>Customer Email</th>
-                <th>Subject</th>
-                <th>Description</th>
-                <th>Status</th>
-                <th>Created At</th>
-                <th>Updated At</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for ticket in tickets %}
-            <tr>
-                <td>{{ ticket.id }}</td>
-                <td>{{ ticket.ticket_id }}</td>
-                <td>{{ ticket.customer_name }}</td>
-                <td>{{ ticket.customer_email }}</td>
-                <td>{{ ticket.subject }}</td>
-                <td>{{ ticket.description }}</td>
-                <td>{{ ticket.status }}</td>
-                <td>{{ ticket.created_at }}</td>
-                <td>{{ ticket.updated_at }}</td>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th class="ticket-id">ID</th>
+                    <th class="ticket-id">Ticket ID</th>
+                    <th class="customer-name">Customer Name</th>
+                    <th class="customer-email">Customer Email</th>
+                    <th class="subject">Subject</th>
+                    <th class="description">Description</th>
+                    <th class="status">Status</th>
+                    <th class="date">Created At</th>
+                    <th class="date">Updated At</th>
+                    <th class="action">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket in tickets %}
+                <tr>
+                    <td>{{ ticket.id }}</td>
+                    <td>{{ ticket.ticket_id }}</td>
+                    <td>{{ ticket.customer_name }}</td>
+                    <td>{{ ticket.customer_email }}</td>
+                    <td>{{ ticket.subject }}</td>
+                    <td>{{ ticket.description }}</td>
+                    <td>{{ ticket.status }}</td>
+                    <td>{{ ticket.created_at }}</td>
+                    <td>
+                        {% if ticket.updated_at == "Action Required" %}
+                            <span style="color: red;">Action Required!</span>
+                        {% else %}
+                            {{ ticket.updated_at }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button onclick="reply_data('{{ ticket.ticket_id }}')">
+                            Reply
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-                <td>
-                    <button onclick="reply_data('{{ ticket.ticket_id }}')">
-                        Reply
-                    </button>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <h1>Notes</h1>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Ticket ID</th>
-                <th>Note</th>
-                <th>Created At</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for note in notes %}
-            <tr>
-                <td>{{ note.id }}</td>
-                <td>{{ note.ticket_id }}</td>
-                <td>{{ note.note_text }}</td>
-                <td>{{ note.created_at }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+
+    <!-- <h1>Notes</h1>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th class="note-ticket-id">Ticket ID</th>
+                    <th class="note-text">Note</th>
+                    <th class="note-date">Created At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for note in notes %}
+                <tr>
+                    <td>{{ note.id }}</td>
+                    <td>{{ note.ticket_id }}</td>
+                    <td>{{ note.note_text }}</td>
+                    <td>{{ note.created_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table> -->
+    </div>
     <div id="reply_modal">
         <div id="reply_box">
             <h2>Reply to Ticket</h2>

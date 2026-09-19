@@ -13,7 +13,7 @@ class Ticket(Base):
     description = Column(Text, nullable=False)
     status = Column(String(20), nullable=False, default="Open")
     created_at = Column(DateTime, nullable=False)
-    updated_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=True)
 
 
 class Note(Base):
