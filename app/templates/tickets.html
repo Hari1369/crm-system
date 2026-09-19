@@ -123,9 +123,20 @@
             font-size: 16px;
         }
 
+        .dashboard-link {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            text-decoration: none;
+            color: white;
+            background-color: #333;
+            padding: 8px 15px;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
+    <a href="/" class="dashboard-link">Dashboard</a>
     <h1>Tickets</h1>
     <div class="search-container">
         <form method="get" action="/tickets" style="display: flex; width: 100%; gap: 10px;">
@@ -156,54 +167,63 @@
                     <th class="customer-name">Customer Name</th>
                     <th class="customer-email">Customer Email</th>
                     <th class="subject">Subject</th>
-                    <th class="description">Description</th>
+                    <th hidden class="description">Description</th>
                     <th class="status">Status</th>
-                    <th class="date">Created At</th>
-                    <th class="date">Updated At</th>
+                    <th class="date">Issue Date</th>
+                    <th class="date">Resolved Date</th>
                     <th class="action">Action</th>
                     <th class="action">View</th>
                 </tr>
             </thead>
             <tbody>
-                {% for ticket in tickets %}
-                <tr>
-                    <td>{{ ticket.id }}</td>
-                    <td>{{ ticket.ticket_id }}</td>
-                    <td>{{ ticket.customer_name }}</td>
-                    <td>{{ ticket.customer_email }}</td>
-                    <td>{{ ticket.subject }}</td>
-                    <td>{{ ticket.description }}</td>
-                    <td>{{ ticket.status }}</td>
-                    <td>{{ ticket.created_at }}</td>
-                    <td>
-                        {% if ticket.updated_at == "Action Required" %}
-                            <span style="color: red;">Action Required!</span>
-                        {% else %}
-                            {{ ticket.updated_at }}
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if ticket.updated_at == "Action Required" %}
-                            <button 
-                                class="reply-btn"
-                                onclick="reply_data('{{ ticket.ticket_id }}')">
-                                Reply
+                {% if tickets %}
+
+                    {% for ticket in tickets %}
+                    <tr>
+                        <td>{{ ticket.id }}</td>
+                        <td>{{ ticket.ticket_id }}</td>
+                        <td>{{ ticket.customer_name }}</td>
+                        <td>{{ ticket.customer_email }}</td>
+                        <td>{{ ticket.subject }}</td>
+                        <td hidden>{{ ticket.description }}</td>
+                        <td>{{ ticket.status }}</td>
+                        <td>{{ ticket.created_at.strftime("%d-%m-%Y %H:%M:%S") }}</td>
+                        <td>
+                            {% if ticket.updated_at is none %}
+                                <span style="color: red;">Action Required!</span>
+                            {% else %}
+                                 {{ ticket.updated_at.strftime("%d-%m-%Y %H:%M:%S") }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if ticket.updated_at is none %}
+                                <button 
+                                    class="reply-btn"
+                                    onclick="reply_data('{{ ticket.ticket_id }}')">
+                                    Reply
+                                </button>
+                            {% else %}
+                                <button 
+                                    class="reply-btn"
+                                    disabled>
+                                    Replied
+                                </button>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button onclick="view_report('{{ ticket.id }}', '{{ ticket.ticket_id }}')">
+                                Report
                             </button>
-                        {% else %}
-                            <button 
-                                class="reply-btn"
-                                disabled>
-                                Replied
-                            </button>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <button onclick="view_report('{{ ticket.id }}', '{{ ticket.ticket_id }}')">
-                            Report
-                        </button>
-                    </td>
-                </tr>
-                {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                  <tr>
+                        <td colspan="4" style="text-align: center;">
+                            No Tickets found
+                        </td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>

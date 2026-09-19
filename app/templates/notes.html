@@ -3,7 +3,6 @@
 <head>
     <title>Support CRM</title>
     <style>
-        /* Modal background */
         #reply_modal {
             display: none;
             position: fixed;
@@ -92,10 +91,57 @@
             cursor: pointer;
         }
         
+        .search-container {
+            width: 100%;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-container input {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .search-container button {
+            width: 100px;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .dashboard-link {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            text-decoration: none;
+            color: white;
+            background-color: #333;
+            padding: 8px 15px;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
+    <a href="/" class="dashboard-link">Dashboard</a>
+
     <h1>Notes</h1>
+    <div class="search-container">
+        <form method="get" action="/notes_report" style="display: flex; width: 100%; gap: 10px;">
+            <input
+                type="text"
+                name="query"
+                placeholder="Search tickets..."
+                value="{{ query }}"
+            >
+            <button type="submit">Search</button>
+
+            <a  href="/notes_report">
+                <button type="button">Clear</button>
+            </a>
+        </form>
+    </div>
+
     <div class="table-container">
         <table>
             <thead>
@@ -107,14 +153,22 @@
                 </tr>
             </thead>
             <tbody>
-                {% for note in notes %}
-                <tr>
-                    <td>{{ note.id }}</td>
-                    <td>{{ note.ticket_id }}</td>
-                    <td>{{ note.note_text }}</td>
-                    <td>{{ note.created_at }}</td>
-                </tr>
-                {% endfor %}
+                {% if notes %}
+                    {% for note in notes %}
+                    <tr>
+                        <td>{{ note.id }}</td>
+                        <td>{{ note.ticket_id }}</td>
+                        <td>{{ note.note_text }}</td>
+                        <td>{{ note.created_at }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center;">
+                            No notes found
+                        </td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>

@@ -8,14 +8,14 @@ from fastapi.templating import Jinja2Templates
 from app.schemas.ticket import Ticket_User
 from datetime import datetime
 from sqlalchemy import or_
+from fastapi import Body
+from zoneinfo import ZoneInfo
 
 app = FastAPI()
 db = SessionLocal()
 templates = Jinja2Templates(directory="app/templates")
 
 
-
-current_time = datetime.now()
 
 
 
@@ -32,6 +32,7 @@ def home(request: Request):
 def register_page(request: Request):
     return templates.TemplateResponse(request, "register.html", {"request": request})
 
+
 @app.get("/tickets", response_class=HTMLResponse)
 def tickets_page(request: Request, query: str = ""):
     if query:
@@ -47,12 +48,105 @@ def tickets_page(request: Request, query: str = ""):
         ).all()
     else:
         tickets = db.query(Ticket).all()
-    
-    notes = db.query(Note).all()
-    tickets_data, notes_data = tables_data(tickets, notes)
+
+    print("DATABASE TICKETS:", tickets)
+    print("NUMBER OF TICKETS:", len(tickets))
+
     return templates.TemplateResponse(
         request,
         "tickets.html",
+        {
+            "request": request,
+            "tickets": tickets,
+            "query": query
+        }
+    )
+
+
+# def tables_data():
+def tables_data(tickets, notes):
+    # tickets = db.query(Ticket).all()
+    # notes = db.query(Note).all()
+
+    tickets_data = []
+    notes_data = []
+
+    if tickets and notes:
+        for i in tickets:
+            id_1 = i.id
+            ticket_id = i.ticket_id
+            customer_name = i.customer_name
+            customer_email = i.customer_email
+            subject = i.subject
+            description = i.description
+            status = i.status
+            created_at = i.created_at.strftime("%d-%m-%Y %H:%M:%S")
+            # updated_at = i.updated_at.strftime("%d-%m-%Y %H:%M:%S")
+            if i.updated_at:
+                updated_at = i.updated_at.strftime("%d-%m-%Y %H:%M:%S")
+            else:
+                updated_at = "Action Required"
+
+            print("1 CREATED AT : ", created_at)
+
+            if id_1 and ticket_id and customer_name and customer_email and subject and description and status:
+                tickets_data.append({
+                    "id": id_1,
+                    "ticket_id": ticket_id,
+                    "customer_name": customer_name,
+                    "customer_email": customer_email,
+                    "subject": subject,
+                    "description": description,
+                    "status": status,
+                    "created_at": created_at,
+                    "updated_at": updated_at
+                })
+            else:
+                print("1 NO DATA FOUND!")
+
+        for i in notes:
+            id_2 = i.id
+            ticket_id = i.ticket_id
+            note_text = i.note_text
+            created_at = i.created_at.strftime("%d-%m-%Y %H:%M:%S")
+
+            print("2 CREATED AT : ", created_at)
+
+            if id_2 and ticket_id and note_text:
+                notes_data.append({
+                    "id": id_2,
+                    "ticket_id": ticket_id,
+                    "note_text": note_text,
+                    "created_at": created_at
+                })
+            else:
+                print("2 NO DATA FOUND!")
+    else:
+        print("3 NO DATA FOUND!")
+    return tickets_data, notes_data
+
+
+
+@app.get("/notes_report", response_class=HTMLResponse)
+def notes_report(request: Request, query: str = ""):
+
+    tickets = db.query(Ticket).all()
+
+    if query:
+        notes = db.query(Note).filter(
+            or_(
+                Note.ticket_id.ilike(f"%{query}%"),
+                Note.note_text.ilike(f"%{query}%")
+            )
+        ).all()
+    else:
+        notes = db.query(Note).all()
+
+    tickets_data, notes_data = tables_data(tickets, notes)
+
+    return templates.TemplateResponse(
+        request,
+        "notes.html",
         {
             "request": request,
             "tickets": tickets_data,
@@ -61,19 +155,12 @@ def tickets_page(request: Request, query: str = ""):
         }
     )
 
-
-    tickets_data, notes_data = tables_data()
-    return templates.TemplateResponse(request,"tickets.html",{"request": request, "tickets": tickets_data, "notes": notes_data})
-
-@app.get("/notes", response_class=HTMLResponse)
-def tickets_page(request: Request):
-    tickets_data, notes_data = tables_data()
-    return templates.TemplateResponse(request,"notes.html",{"request": request, "tickets": tickets_data, "notes": notes_data})
-
-
-
+    
 @app.post("/register")
 def register_ticket(request: Request, customer_name: str = Form(), customer_email: str = Form(), subject: str = Form(), description: str = Form()):
+
+    current_time = datetime.now(ZoneInfo("Asia/Kolkata")).replace(tzinfo=None)
+
     ticket = Ticket_User(customer_name=customer_name, customer_email=customer_email, subject=subject, description=description)
     # print("Customer Name    :", ticket.customer_name)
     # print("Customer Email   :", ticket.customer_email)
@@ -113,9 +200,12 @@ def register_ticket(request: Request, customer_name: str = Form(), customer_emai
     )
 
 
-
 @app.post("/reply")
 def reply_ticket(ticket_id: str = Form(), note_text: str = Form()):
+
+    # current_time = datetime.now(ZoneInfo("Asia/Kolkata"))
+    current_time = datetime.now(ZoneInfo("Asia/Kolkata")).replace(tzinfo=None)
+
     ticket = db.query(Ticket).filter(Ticket.ticket_id == ticket_id).first()
     if not ticket:
         return {"message": "Ticket not found"}
@@ -142,10 +232,6 @@ def ticket_report(request: Request, id: int, ticket_id: str):
     else:
         updated_at = "Action Required"
 
-
-    # -------------------------
-    # Notes date formatting
-    # -------------------------
     notes_data = []
     for note in notes:
         note_created_at = note.created_at.strftime("%d-%m-%Y %H:%M:%S")
@@ -156,7 +242,6 @@ def ticket_report(request: Request, id: int, ticket_id: str):
             "created_at": note_created_at,
             "notes": notes_data
         })
-
 
     return templates.TemplateResponse(
         request,
@@ -170,63 +255,45 @@ def ticket_report(request: Request, id: int, ticket_id: str):
         }
     )
 
-# def tables_data():
-def tables_data(tickets, notes):
-    # tickets = db.query(Ticket).all()
-    # notes = db.query(Note).all()
+@app.put("/tickets/{ticket_id}")
+def resolve_ticket(ticket_id: str, data: dict = Body(...)):
+    ticket = db.query(Ticket).filter(Ticket.ticket_id == ticket_id).first()
+    if not ticket:
+        return {
+            "success": False,
+            "message": "Ticket not found"
+        }
 
-    tickets_data = []
-    notes_data = []
+    status = data.get("status")
+    note_text = data.get("notes")
 
-    if tickets and notes:
-        for i in tickets:
-            id_1 = i.id
-            ticket_id = i.ticket_id
-            customer_name = i.customer_name
-            customer_email = i.customer_email
-            subject = i.subject
-            description = i.description
-            status = i.status
-            created_at = i.created_at.strftime("%d-%m-%Y %H:%M:%S")
-            # updated_at = i.updated_at.strftime("%d-%m-%Y %H:%M:%S")
-            if i.updated_at:
-                updated_at = i.updated_at.strftime("%d-%m-%Y %H:%M:%S")
-            else:
-                updated_at = "Action Required"
+    if not note_text:
+        return {
+            "success": False,
+            "message": "Reply message is required"
+        }
 
-            if id_1 and ticket_id and customer_name and customer_email and subject and description and status:
-                tickets_data.append({
-                    "id": id_1,
-                    "ticket_id": ticket_id,
-                    "customer_name": customer_name,
-                    "customer_email": customer_email,
-                    "subject": subject,
-                    "description": description,
-                    "status": status,
-                    "created_at": created_at,
-                    "updated_at": updated_at
-                })
-            else:
-                print("1 NO DATA FOUND!")
+    # current_time = datetime.now(ZoneInfo("Asia/Kolkata"))
+    current_time = datetime.now(ZoneInfo("Asia/Kolkata")).replace(tzinfo=None)
 
-        for i in notes:
-            id_2 = i.id
-            ticket_id = i.ticket_id
-            note_text = i.note_text
-            created_at = i.created_at.strftime("%d-%m-%Y %H:%M:%S")
+    ticket.status = status
+    ticket.updated_at = current_time
 
-            if id_2 and ticket_id and note_text:
-                notes_data.append({
-                    "id": id_2,
-                    "ticket_id": ticket_id,
-                    "note_text": note_text,
-                    "created_at": created_at
-                })
-            else:
-                print("2 NO DATA FOUND!")
-    else:
-        print("3 NO DATA FOUND!")
-    return tickets_data, notes_data
+    new_note = Note(
+        ticket_id=ticket_id,
+        note_text=note_text,
+        created_at=current_time
+    )
+
+    db.add(new_note)
+    db.commit()
+
+    return {
+        "success": True,
+        "updated_at": current_time.strftime("%d-%m-%Y %H:%M:%S")
+    }
+
+
 
 
 
