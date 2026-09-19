@@ -33,34 +33,58 @@ def register_page(request: Request):
     return templates.TemplateResponse(request, "register.html", {"request": request})
 
 
+ALLOWED_STATUSES = ["Open", "In Progress", "Closed"]
+
 @app.get("/tickets", response_class=HTMLResponse)
-def tickets_page(request: Request, query: str = ""):
+def tickets_page(request: Request, query: str = "", status: str = ""):
+    q = db.query(Ticket)
+
     if query:
-        tickets = db.query(Ticket).filter(
-            or_(
-                Ticket.ticket_id.ilike(f"%{query}%"),
-                Ticket.customer_name.ilike(f"%{query}%"),
-                Ticket.customer_email.ilike(f"%{query}%"),
-                Ticket.subject.ilike(f"%{query}%"),
-                Ticket.description.ilike(f"%{query}%"),
-                Ticket.status.ilike(f"%{query}%")
-            )
-        ).all()
-    else:
-        tickets = db.query(Ticket).all()
+        q = q.filter(or_(
+            Ticket.ticket_id.ilike(f"%{query}%"),
+            Ticket.customer_name.ilike(f"%{query}%"),
+            Ticket.customer_email.ilike(f"%{query}%"),
+            Ticket.subject.ilike(f"%{query}%"),
+            Ticket.description.ilike(f"%{query}%"),
+        ))
 
-    print("DATABASE TICKETS:", tickets)
-    print("NUMBER OF TICKETS:", len(tickets))
+    if status in ALLOWED_STATUSES:
+        q = q.filter(Ticket.status == status)
 
-    return templates.TemplateResponse(
-        request,
-        "tickets.html",
-        {
-            "request": request,
-            "tickets": tickets,
-            "query": query
-        }
-    )
+    tickets = q.order_by(Ticket.created_at.desc()).all()
+    return templates.TemplateResponse(request, "tickets.html", {
+        "request": request, "tickets": tickets, "query": query,
+        "status": status, "statuses": ALLOWED_STATUSES,
+    })
+
+# @app.get("/tickets", response_class=HTMLResponse)
+# def tickets_page(request: Request, query: str = ""):
+#     if query:
+#         tickets = db.query(Ticket).filter(
+#             or_(
+#                 Ticket.ticket_id.ilike(f"%{query}%"),
+#                 Ticket.customer_name.ilike(f"%{query}%"),
+#                 Ticket.customer_email.ilike(f"%{query}%"),
+#                 Ticket.subject.ilike(f"%{query}%"),
+#                 Ticket.description.ilike(f"%{query}%"),
+#                 Ticket.status.ilike(f"%{query}%")
+#             )
+#         ).all()
+#     else:
+#         tickets = db.query(Ticket).all()
+
+#     print("DATABASE TICKETS:", tickets)
+#     print("NUMBER OF TICKETS:", len(tickets))
+
+#     return templates.TemplateResponse(
+#         request,
+#         "tickets.html",
+#         {
+#             "request": request,
+#             "tickets": tickets,
+#             "query": query
+#         }
+#     )
 
 
 # def tables_data():
@@ -201,7 +225,7 @@ def register_ticket(request: Request, customer_name: str = Form(), customer_emai
 
 
 @app.post("/reply")
-def reply_ticket(ticket_id: str = Form(), note_text: str = Form()):
+def reply_ticket(ticket_id: str = Form(), note_text: str = Form(), status: str = Form("In Progress")):
 
     # current_time = datetime.now(ZoneInfo("Asia/Kolkata"))
     current_time = datetime.now(ZoneInfo("Asia/Kolkata")).replace(tzinfo=None)
@@ -212,6 +236,8 @@ def reply_ticket(ticket_id: str = Form(), note_text: str = Form()):
     new_note = Note(ticket_id=ticket_id, note_text=note_text, created_at=current_time)
     db.add(new_note)
     ticket.updated_at = current_time
+    if status in ALLOWED_STATUSES:
+        ticket.status = status
     db.commit()
     db.refresh(new_note)
 

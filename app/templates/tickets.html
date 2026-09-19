@@ -139,6 +139,8 @@
     <a href="/" class="dashboard-link">Dashboard</a>
     <h1>Tickets</h1>
     <div class="search-container">
+
+
         <form method="get" action="/tickets" style="display: flex; width: 100%; gap: 10px;">
             <input
                 type="text"
@@ -146,6 +148,14 @@
                 placeholder="Search tickets..."
                 value="{{ query }}"
             >
+                
+            <select name="status" onchange="this.form.submit()">
+                <option value="">Statuses</option>
+                {% for s in statuses %}
+                    <option value="{{ s }}" {% if status == s %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+            </select>
+            
             <button type="submit">Search</button>
 
             <a href="/tickets">
@@ -172,7 +182,7 @@
                     <th class="date">Issue Date</th>
                     <th class="date">Resolved Date</th>
                     <th class="action">Action</th>
-                    <th class="action">View</th>
+                    <!-- <th class="action">View</th> -->
                 </tr>
             </thead>
             <tbody>
@@ -195,21 +205,21 @@
                                  {{ ticket.updated_at.strftime("%d-%m-%Y %H:%M:%S") }}
                             {% endif %}
                         </td>
-                        <td>
+                        <!-- <td>
                             {% if ticket.updated_at is none %}
                                 <button 
                                     class="reply-btn"
                                     onclick="reply_data('{{ ticket.ticket_id }}')">
-                                    Reply
+                                    Update Ticket
                                 </button>
                             {% else %}
                                 <button 
                                     class="reply-btn"
                                     disabled>
-                                    Replied
+                                    Updated
                                 </button>
                             {% endif %}
-                        </td>
+                        </td> -->
                         <td>
                             <button onclick="view_report('{{ ticket.id }}', '{{ ticket.ticket_id }}')">
                                 Report
@@ -235,6 +245,11 @@
             <form method="post" action="/reply">
                 <input type="hidden" name="ticket_id" id="ticket_id">
                 <textarea name="note_text" rows="5" cols="50" placeholder="Write your reply..." required ></textarea>
+                <select name="status">
+                    {% for s in statuses %}
+                        <option value="{{ s }}" {% if s == "In Progress" %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                </select>
                 <br>
                 <br>
                 <button type="submit"> Send Reply</button>
