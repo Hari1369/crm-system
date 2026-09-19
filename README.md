@@ -161,10 +161,10 @@ Open **http://127.0.0.1:8000** in your browser. `--reload` restarts the server a
 ## Using the app
 
 1. **Dashboard** (`/`) — links to create tickets, view tickets and view notes.
-2. **Create a ticket** (`/register_ticket`) — fill in the form. The new ticket starts as **Open**.
-3. **View tickets** (`/tickets`) — type in the search box and press **Search**, or pick a status from the dropdown to filter. Press **Clear** to reset.
+2. **Create a ticket** (`/api/api/register_ticket`) — fill in the form. The new ticket starts as **Open**.
+3. **View tickets** (`/api/tickets`) — type in the search box and press **Search**, or pick a status from the dropdown to filter. Press **Clear** to reset.
 4. **Open a ticket** — press **Report** on any row to see its details and notes. Press **Update Ticket** to choose a new status and write a note.
-5. **Notes** (`/notes_report`) — every note across all tickets.
+5. **Notes** (`/api/notes_report`) — every note across all tickets.
 
 Rules for the create-ticket form:
 
@@ -178,14 +178,14 @@ Rules for the create-ticket form:
 | Method | Path                               | Purpose                                             |
 |--------|------------------------------------|-----------------------------------------------------|
 | GET    | `/`                                | Dashboard                                           |
-| GET    | `/register_ticket`                 | Create-ticket form                                  |
-| POST   | `/register`                        | Save a new ticket                                   |
-| GET    | `/tickets?query=&status=`          | Ticket list; optional search text and status filter |
-| GET    | `/ticket_report?id=&ticket_id=`    | Ticket details and notes                            |
-| PUT    | `/tickets/{ticket_id}`             | Update status and add a note                        |
-| GET    | `/notes_report?query=`             | All notes; optional search text                     |
+| GET    | `/api/api/register_ticket`                 | Create-ticket form                                  |
+| POST   | `/api/register`                        | Save a new ticket                                   |
+| GET    | `/api/tickets?query=&status=`          | Ticket list; optional search text and status filter |
+| GET    | `/api/ticket_report?id=&ticket_id=`    | Ticket details and notes                            |
+| PUT    | `/api/tickets/{ticket_id}`             | Update status and add a note                        |
+| GET    | `/api/notes_report?query=`             | All notes; optional search text                     |
 
-`PUT /tickets/{ticket_id}` example:
+`PUT /api/tickets/{ticket_id}` example:
 
 { "status": "In Progress", "notes": "Looking into the issue." }
 

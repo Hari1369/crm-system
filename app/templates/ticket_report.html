@@ -148,7 +148,7 @@
         {% endif %}
         <button
             class="back-button"
-            onclick="window.location.href='/tickets'">
+            onclick="window.location.href='/api/tickets'">
             Back to Tickets
         </button>
     </div>
@@ -177,7 +177,7 @@
             }
 
             const response = await fetch(
-                "/tickets/" + current_ticket_id,
+                "/api/tickets/" + current_ticket_id,
                 {
                     method: "PUT",
                     headers: {

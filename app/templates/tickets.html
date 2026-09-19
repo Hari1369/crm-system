@@ -141,7 +141,7 @@
     <div class="search-container">
 
 
-        <form method="get" action="/tickets" style="display: flex; width: 100%; gap: 10px;">
+        <form method="get" action="/api/tickets" style="display: flex; width: 100%; gap: 10px;">
             <input
                 type="text"
                 name="query"
@@ -158,7 +158,7 @@
             
             <button type="submit">Search</button>
 
-            <a href="/tickets">
+            <a href="/api/tickets">
                 <button type="button">Clear</button>
             </a>
         </form>
@@ -242,7 +242,7 @@
         <div id="reply_box">
             <h2>Reply to Ticket</h2>
             <p>Ticket ID: <span id="reply_ticket_id"></span></p>
-            <form method="post" action="/reply">
+            <form method="post" action="/api/reply">
                 <input type="hidden" name="ticket_id" id="ticket_id">
                 <textarea name="note_text" rows="5" cols="50" placeholder="Write your reply..." required ></textarea>
                 <select name="status">
@@ -269,7 +269,7 @@
             document.getElementById("reply_modal").style.display = "none";
         }
         function view_report(id, ticket_id) {
-            window.location.href = "/ticket_report?id=" + id + "&ticket_id=" + ticket_id;
+            window.location.href = "/api/ticket_report?id=" + id + "&ticket_id=" + ticket_id;
         }
     </script>
 </body>

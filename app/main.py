@@ -11,7 +11,6 @@ from sqlalchemy import or_
 from fastapi import Body
 from zoneinfo import ZoneInfo
 
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 db = SessionLocal()
@@ -29,14 +28,14 @@ def home(request: Request):
     return templates.TemplateResponse(request, "dashboard.html", {"request": request})
 
 
-@app.get("/register_ticket", response_class=HTMLResponse)
+@app.get("/api/api/register_ticket", response_class=HTMLResponse)
 def register_page(request: Request):
     return templates.TemplateResponse(request, "register.html", {"request": request})
 
 
 ALLOWED_STATUSES = ["Open", "In Progress", "Closed"]
 
-@app.get("/tickets", response_class=HTMLResponse)
+@app.get("/api/tickets", response_class=HTMLResponse)
 def tickets_page(request: Request, query: str = "", status: str = ""):
     q = db.query(Ticket)
 
@@ -58,7 +57,7 @@ def tickets_page(request: Request, query: str = "", status: str = ""):
         "status": status, "statuses": ALLOWED_STATUSES,
     })
 
-# @app.get("/tickets", response_class=HTMLResponse)
+# @app.get("/api/tickets", response_class=HTMLResponse)
 # def tickets_page(request: Request, query: str = ""):
 #     if query:
 #         tickets = db.query(Ticket).filter(
@@ -152,7 +151,7 @@ def tables_data(tickets, notes):
 
 
 
-@app.get("/notes_report", response_class=HTMLResponse)
+@app.get("/api/notes_report", response_class=HTMLResponse)
 def notes_report(request: Request, query: str = ""):
 
     tickets = db.query(Ticket).all()
@@ -181,7 +180,7 @@ def notes_report(request: Request, query: str = ""):
     )
 
     
-@app.post("/register")
+@app.post("/api/register")
 def register_ticket(request: Request, customer_name: str = Form(), customer_email: str = Form(), subject: str = Form(), description: str = Form()):
 
     current_time = datetime.now(ZoneInfo("Asia/Kolkata")).replace(tzinfo=None)
@@ -225,7 +224,7 @@ def register_ticket(request: Request, customer_name: str = Form(), customer_emai
     )
 
 
-@app.post("/reply")
+@app.post("/api/reply")
 def reply_ticket(ticket_id: str = Form(), note_text: str = Form(), status: str = Form("In Progress")):
 
     # current_time = datetime.now(ZoneInfo("Asia/Kolkata"))
@@ -242,10 +241,10 @@ def reply_ticket(ticket_id: str = Form(), note_text: str = Form(), status: str =
     db.commit()
     db.refresh(new_note)
 
-    return RedirectResponse(url="/tickets", status_code=303)
+    return RedirectResponse(url="/api/tickets", status_code=303)
 
 
-@app.get("/ticket_report", response_class=HTMLResponse)
+@app.get("/api/ticket_report", response_class=HTMLResponse)
 def ticket_report(request: Request, id: int, ticket_id: str):
     ticket = db.query(Ticket).filter(Ticket.id == id, Ticket.ticket_id == ticket_id).first()
     if not ticket:
@@ -282,7 +281,7 @@ def ticket_report(request: Request, id: int, ticket_id: str):
         }
     )
 
-@app.put("/tickets/{ticket_id}")
+@app.put("/api/tickets/{ticket_id}")
 def resolve_ticket(ticket_id: str, data: dict = Body(...)):
     ticket = db.query(Ticket).filter(Ticket.ticket_id == ticket_id).first()
     if not ticket:
@@ -328,7 +327,7 @@ db.close()
 
 
 
-# @app.post("/register")
+# @app.post("/api/register")
 # def register_ticket(customer_name: str = Form(), customer_email: str = Form(), subject: str = Form(), description: str = Form()):
 #     print("Customer Name:", customer_name)
 #     print("Customer Email:", customer_email)

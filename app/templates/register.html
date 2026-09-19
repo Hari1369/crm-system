@@ -28,7 +28,7 @@
     </style>
 </head>
 <body>
-<a href="/tickets" class="tickets-link">View All Tickets</a>
+<a href="/api/tickets" class="tickets-link">View All Tickets</a>
 <a href="/" class="dashboard-link">Dashboard</a>
 
 <h1>Create New Support Ticket</h1>
@@ -37,7 +37,7 @@
         <p style="color: green;">Ticket ID: {{ ticket_id }}</p>
     {% endif %}
 
-    <form method="post" action="/register">
+    <form method="post" action="/api/register">
         <div>
             <label for="customer_name">Customer Name: </label>
             <input type="text" id="customer_name" name="customer_name" required>
