@@ -19,16 +19,29 @@ current_time = datetime.now()
 
 
 @app.get("/", response_class=HTMLResponse)
-def home():
+def home(request: Request):
     if db:
         print("Database is configured")
     else:
         print("Database is NOT configured")
-    return "OK"
+    return templates.TemplateResponse(request, "dashboard.html", {"request": request})
+
 
 @app.get("/register_ticket", response_class=HTMLResponse)
 def register_page(request: Request):
     return templates.TemplateResponse(request, "register.html", {"request": request})
+
+@app.get("/tickets", response_class=HTMLResponse)
+def tickets_page(request: Request):
+    tickets_data, notes_data = tables_data()
+    return templates.TemplateResponse(request,"tickets.html",{"request": request, "tickets": tickets_data, "notes": notes_data})
+
+@app.get("/notes", response_class=HTMLResponse)
+def tickets_page(request: Request):
+    tickets_data, notes_data = tables_data()
+    return templates.TemplateResponse(request,"notes.html",{"request": request, "tickets": tickets_data, "notes": notes_data})
+
+
 
 @app.post("/register")
 def register_ticket(request: Request, customer_name: str = Form(), customer_email: str = Form(), subject: str = Form(), description: str = Form()):
@@ -69,11 +82,6 @@ def register_ticket(request: Request, customer_name: str = Form(), customer_emai
             "ticket_id": new_ticket.ticket_id
         }
     )
-
-@app.get("/tickets", response_class=HTMLResponse)
-def tickets_page(request: Request):
-    tickets_data, notes_data = tables_data()
-    return templates.TemplateResponse(request,"tickets.html",{"request": request, "tickets": tickets_data, "notes": notes_data})
 
 def tables_data():
     tickets = db.query(Ticket).all()
@@ -119,7 +127,6 @@ def tables_data():
             note_text = i.note_text
             created_at = i.created_at.strftime("%d-%m-%Y %H:%M:%S")
 
-
             if id_2 and ticket_id and note_text:
                 notes_data.append({
                     "id": id_2,
@@ -132,7 +139,6 @@ def tables_data():
     else:
         print("3 NO DATA FOUND!")
     return tickets_data, notes_data
-
 
 
 
