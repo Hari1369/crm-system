@@ -247,3 +247,19 @@ Two tables, created automatically on startup:
 5. Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 
 The tables are created automatically on the first start.
+
+
+Name:
+crm-database
+
+Database:
+support_crm
+
+User:
+support_admin
+
+Region:
+choose a region
+
+Plan:
+Free

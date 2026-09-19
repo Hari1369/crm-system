@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import text
 
-from app.database import engine, SessionLocal
+from app.database import engine, SessionLocal, Base
 from app.models import Ticket, Note
 from fastapi.templating import Jinja2Templates
 from app.schemas.ticket import Ticket_User
@@ -11,10 +11,11 @@ from sqlalchemy import or_
 from fastapi import Body
 from zoneinfo import ZoneInfo
 
+Base.metadata.create_all(bind=engine)
+
 app = FastAPI()
 db = SessionLocal()
 templates = Jinja2Templates(directory="app/templates")
-
 
 
 
