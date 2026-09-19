@@ -161,7 +161,7 @@ Open **http://127.0.0.1:8000** in your browser. `--reload` restarts the server a
 ## Using the app
 
 1. **Dashboard** (`/`) — links to create tickets, view tickets and view notes.
-2. **Create a ticket** (`/api/api/register_ticket`) — fill in the form. The new ticket starts as **Open**.
+2. **Create a ticket** (`/api/register_ticket`) — fill in the form. The new ticket starts as **Open**.
 3. **View tickets** (`/api/tickets`) — type in the search box and press **Search**, or pick a status from the dropdown to filter. Press **Clear** to reset.
 4. **Open a ticket** — press **Report** on any row to see its details and notes. Press **Update Ticket** to choose a new status and write a note.
 5. **Notes** (`/api/notes_report`) — every note across all tickets.
@@ -178,7 +178,7 @@ Rules for the create-ticket form:
 | Method | Path                               | Purpose                                             |
 |--------|------------------------------------|-----------------------------------------------------|
 | GET    | `/`                                | Dashboard                                           |
-| GET    | `/api/api/register_ticket`                 | Create-ticket form                                  |
+| GET    | `/api/register_ticket`                 | Create-ticket form                                  |
 | POST   | `/api/register`                        | Save a new ticket                                   |
 | GET    | `/api/tickets?query=&status=`          | Ticket list; optional search text and status filter |
 | GET    | `/api/ticket_report?id=&ticket_id=`    | Ticket details and notes                            |

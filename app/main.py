@@ -28,7 +28,7 @@ def home(request: Request):
     return templates.TemplateResponse(request, "dashboard.html", {"request": request})
 
 
-@app.get("/api/api/register_ticket", response_class=HTMLResponse)
+@app.get("/api/register_ticket", response_class=HTMLResponse)
 def register_page(request: Request):
     return templates.TemplateResponse(request, "register.html", {"request": request})
 
